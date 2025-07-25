@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { InternalError, UnauthorizedError } from '../common/app.error';
+import { InternalError, InvalidTokenError, UnauthorizedError } from '../common/app.error';
 
 export default function registerJwtPlugin(
   server: FastifyInstance,
@@ -16,8 +16,8 @@ export default function registerJwtPlugin(
     try {
       request.authPayload = verifyJwt(token);
     } catch (err) {
-      console.error('Unable to verify and decode jwt token', err);
-      throw new InternalError('Decoding token error');
+      console.error('Unable to verify jwt token', err);
+      throw new InvalidTokenError('Invalid jwt token');
     }
   });
 }

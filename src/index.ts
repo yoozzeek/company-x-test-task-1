@@ -15,7 +15,7 @@ import { errorHandler } from './common/app.error';
 import { Pool } from 'pg';
 import { setupTracing } from './common/tracer.otel';
 
-setupTracing('api_service');
+// setupTracing('api_service');
 
 async function main() {
   const server: FastifyInstance = Fastify({

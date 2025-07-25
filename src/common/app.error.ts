@@ -13,6 +13,8 @@ export class NotFoundError extends AppError {}
 export class AlreadyExistsError extends AppError {}
 export class UnauthorizedError extends AppError {}
 export class InvalidTokenError extends AppError {}
+export class InvalidPasswordError extends AppError {}
+export class UserNotExists extends AppError {}
 export class AccessDeniedError extends AppError {}
 
 export async function errorHandler(err: FastifyError, req: FastifyRequest, res: FastifyReply) {
@@ -24,15 +26,15 @@ export async function errorHandler(err: FastifyError, req: FastifyRequest, res: 
     return res.status(400).send({ error: 'BadRequest', data: err.message });
   }
 
-  if (err instanceof InvalidTokenError) {
-    return res.status(400).send({ error: 'InvalidJWT' });
+  if (err instanceof InvalidTokenError || err instanceof InvalidPasswordError) {
+    return res.status(400).send({ error: err.message });
   }
 
   if (err instanceof AccessDeniedError) {
     return res.status(403).send({ error: 'AccessDenied' });
   }
 
-  if (err instanceof NotFoundError) {
+  if (err instanceof NotFoundError || err instanceof UserNotExists) {
     return res.status(404).send({ error: 'NotFound' });
   }
 

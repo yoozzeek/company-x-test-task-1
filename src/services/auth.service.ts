@@ -3,7 +3,7 @@ import { trace } from '@opentelemetry/api';
 import { LoginDtoType, RegisterDtoType } from '../dto/auth.dto';
 import { AuthRepository } from '../repositories/auth.repository';
 import { UserService } from './user.service';
-import { NotFoundError } from '../common/app.error';
+import { InvalidPasswordError, NotFoundError, UserNotExists } from '../common/app.error';
 
 const tracer = trace.getTracer('auth.service');
 
@@ -29,18 +29,21 @@ export class AuthService {
   }
 
   public async login(data: LoginDtoType) {
-    await tracer.startActiveSpan('auth.service.login', async (span) => {
+    return await tracer.startActiveSpan('auth.service.login', async (span) => {
       try {
         const user = await this.user.getByEmail(data.email);
-        if (!user) throw new Error('Invalid email');
+        if (!user) throw new UserNotExists('User not found');
 
         const passwordHash = await this.repo.getPasswordHash(user.id);
-        if (!passwordHash) throw new NotFoundError('User not found');
+        if (!passwordHash) throw new NotFoundError('Password hash not found');
 
         const isValid = await bcrypt.compare(data.password, passwordHash);
-        if (!isValid) throw new Error('Invalid password');
+        if (!isValid) throw new InvalidPasswordError('Invalid password');
 
         return this.signJWT({ id: user.id, email: user.email });
+      } catch (e) {
+        span.recordException(e instanceof Error ? e : String(e));
+        throw e;
       } finally {
         span.end();
       }
