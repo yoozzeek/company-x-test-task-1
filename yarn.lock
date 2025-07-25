@@ -395,7 +395,7 @@
     fastify-plugin "^5.0.0"
     toad-cache "^3.7.0"
 
-"@fastify/error@^4.0.0":
+"@fastify/error@^4.0.0", "@fastify/error@^4.2.0":
   version "4.2.0"
   resolved "https://registry.npmjs.org/@fastify/error/-/error-4.2.0.tgz"
   integrity sha512-RSo3sVDXfHskiBZKBPRgnQTtIqpi/7zhJOEmAxCiBcM7d0uwdGdxLlsCaLzGs8v8NnxIRlfG0N51p5yFaOentQ==
@@ -2598,6 +2598,13 @@ fastify-plugin@^5.0.0:
   version "5.0.1"
   resolved "https://registry.npmjs.org/fastify-plugin/-/fastify-plugin-5.0.1.tgz"
   integrity sha512-HCxs+YnRaWzCl+cWRYFnHmeRFyR5GVnJTAaCJQiYzQSDwK9MgJdyAsuL3nh0EWRCYMgQ5MeziymvmAhUHYHDUQ==
+
+fastify-type-provider-zod@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/fastify-type-provider-zod/-/fastify-type-provider-zod-5.0.2.tgz#fefa6eb14ae48e8f01b18163d5f2659b9bb7e221"
+  integrity sha512-myolKCxze2rx25Ia88Erb4TZpFIUWyCUqMDgNqE6KQnXoERXwMCPuwfj/1zKkVBlu5dvLo1c/H7GneZUhOWXiw==
+  dependencies:
+    "@fastify/error" "^4.2.0"
 
 fastify@^5.4.0:
   version "5.4.0"
@@ -4835,6 +4842,7 @@ string-length@^4.0.2:
     strip-ansi "^6.0.0"
 
 "string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
+  name string-width-cjs
   version "4.2.3"
   resolved "https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -4885,6 +4893,7 @@ string.prototype.trimstart@^1.0.8:
     es-object-atoms "^1.0.0"
 
 "strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+  name strip-ansi-cjs
   version "6.0.1"
   resolved "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -5326,6 +5335,7 @@ word-wrap@^1.2.5:
   integrity sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==
 
 "wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+  name wrap-ansi-cjs
   version "7.0.0"
   resolved "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-7.0.0.tgz"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==

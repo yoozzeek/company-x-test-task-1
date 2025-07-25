@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { trace } from '@opentelemetry/api';
-import { LoginDtoType, RegisterDtoType } from '../dto/auth.dto';
+import { LoginDto, RegisterDto } from '../dto/auth.dto';
 import { AuthRepository } from '../repositories/auth.repository';
 import { UserService } from './user.service';
 import { InvalidPasswordError, NotFoundError, UserNotExists } from '../common/app.error';
@@ -14,7 +14,7 @@ export class AuthService {
     private signJWT: (payload: object) => string
   ) {}
 
-  public async register(data: RegisterDtoType) {
+  public async register(data: RegisterDto) {
     await tracer.startActiveSpan('user.service.register', async (span) => {
       try {
         const passwordHash = await bcrypt.hash(data.password, 10);
@@ -28,7 +28,7 @@ export class AuthService {
     });
   }
 
-  public async login(data: LoginDtoType) {
+  public async login(data: LoginDto) {
     return await tracer.startActiveSpan('auth.service.login', async (span) => {
       try {
         const user = await this.user.getByEmail(data.email);

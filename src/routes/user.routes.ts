@@ -1,9 +1,11 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { UserService } from '../services/user.service';
+import { usersListDto } from '../dto/user.dto';
+import { z } from 'zod';
 
 export function initUserRoutes(userService: UserService): FastifyPluginAsync {
-  return async function userRoutes(server: FastifyInstance) {
-    server.route({
+  return async function userRoutes(app: FastifyInstance) {
+    app.route({
       method: 'GET',
       url: '/',
       schema: {
@@ -12,33 +14,20 @@ export function initUserRoutes(userService: UserService): FastifyPluginAsync {
         tags: ['Users'],
         security: [{ apiKey: [] }],
         response: {
-          200: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                id: { type: 'number' },
-                email: { type: 'string', format: 'email' },
-              },
-            },
-          },
-          401: {
-            description: 'Unauthorized',
-            type: 'object',
-            properties: {
-              error: { type: 'string' },
-            },
-          },
-          500: {
-            description: 'InternalError',
-            type: 'object',
-            properties: {
-              error: { type: 'string' },
-            },
-          },
+          200: usersListDto,
+          401: z
+            .object({
+              error: z.string(),
+            })
+            .describe('Unauthorized'),
+          500: z
+            .object({
+              error: z.string(),
+            })
+            .describe('InternalError'),
         },
       },
-      onRequest: server.authenticate as any,
+      onRequest: app.authenticate as any,
       handler: async (req, res) => {
         const users = await userService.search();
         res.send(users);

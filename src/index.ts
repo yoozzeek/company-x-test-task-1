@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import type { FastifyInstance } from 'fastify';
 import { Pool } from 'pg';
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { config } from './config';
 import { initAuthRoutes } from './routes/auth.routes';
 import { initUserRoutes } from './routes/user.routes';
@@ -18,8 +19,10 @@ import { setupTracing } from './common/tracer.otel';
 
 setupTracing('api_service');
 
+let isShuttingDown = false;
+
 async function main() {
-  const server: FastifyInstance = Fastify({
+  const app: FastifyInstance = Fastify({
     logger: true,
   });
 
@@ -31,6 +34,9 @@ async function main() {
     port: 5432,
   });
 
+  app.setValidatorCompiler(validatorCompiler);
+  app.setSerializerCompiler(serializerCompiler);
+
   const userRepository = new UserRepository(pgPool);
   const userService = new UserService(userRepository);
   const userRoutes = initUserRoutes(userService);
@@ -39,24 +45,45 @@ async function main() {
   const authService = new AuthService(authRepository, userService, signJwt);
   const authRoutes = initAuthRoutes(authService);
 
-  await server.register(cors, {});
-  server.register(fastifyHelmet, { contentSecurityPolicy: false });
-  server.register(swaggerPlugin);
+  await app.register(cors, {});
+  app.register(fastifyHelmet, { contentSecurityPolicy: false });
+  app.register(swaggerPlugin);
 
-  registerJwtPlugin(server, verifyJwt);
+  registerJwtPlugin(app, verifyJwt);
 
-  server.register(authRoutes, { prefix: '/v1/auth' });
-  server.register(userRoutes, { prefix: '/v1/users' });
+  app.register(authRoutes, { prefix: '/v1/auth' });
+  app.register(userRoutes, { prefix: '/v1/users' });
 
-  server.setErrorHandler(errorHandler);
+  app.setErrorHandler(errorHandler);
 
-  server.listen({ host: '0.0.0.0', port: config.port }, function (err, address) {
+  app.listen({ host: '0.0.0.0', port: config.port }, function (err, address) {
     if (err) {
-      server.log.error(err);
+      app.log.error(err);
       process.exit(1);
     }
 
     console.log(`Server is now listening on ${address}`);
+  });
+
+  ['SIGINT', 'SIGTERM'].forEach((signal) => {
+    process.on(signal, async () => {
+      if (isShuttingDown) return;
+      isShuttingDown = true;
+      console.info(`${signal} received. Gracefully shutting down...`);
+
+      const timeout = setTimeout(() => {
+        console.warn('Forcefully shutting down after 20 seconds.');
+        process.exit(1);
+      }, 10000);
+      timeout.unref();
+
+      await app.close();
+      await pgPool.end();
+
+      console.log('[shutdown] Closed out remaining connections');
+      clearTimeout(timeout);
+      process.exit(0);
+    });
   });
 }
 

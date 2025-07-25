@@ -1,6 +1,7 @@
 import fp from 'fastify-plugin';
 import fastifySwagger from '@fastify/swagger';
 import { fastifySwaggerUi } from '@fastify/swagger-ui';
+import { jsonSchemaTransform, jsonSchemaTransformObject } from 'fastify-type-provider-zod';
 
 export default fp(async (app) => {
   await app.register(fastifySwagger, {
@@ -22,15 +23,12 @@ export default fp(async (app) => {
         },
       },
     },
+    transform: jsonSchemaTransform,
+    transformObject: jsonSchemaTransformObject,
   });
 
   await app.register(fastifySwaggerUi, {
     routePrefix: '/docs',
-    uiConfig: {
-      docExpansion: 'list',
-      deepLinking: false,
-    },
-    staticCSP: true,
   });
 
   app.addHook('onReady', async () => {
