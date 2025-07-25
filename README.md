@@ -6,6 +6,8 @@ I don't use Nest.js here because it's overkill for a task, but still use OpenTel
 because whatever framework or library we use for auth service the observability 
 as well as security is critical.
 
+### Urls
+
 After installation and start http server will be listening at http://127.0.0.1:3000.
 
 All routes available with `/v1` prefix and follow Rest API spec.
@@ -13,6 +15,10 @@ So final handlers be at these urls:
 * `/v1/auth/login`: Authorizes user and returns JWT token.
 * `/v1/auth/register`: Creates user with email and password.
 * `/v1/users`: Returns list of all users if request has valid jwt token.
+
+### API Docs
+
+Check API docs in Swagger UI that is available at http://127.0.0.1:3000/docs
 
 ## Installation
 The app requires you have `Postgres` database installed and running. 

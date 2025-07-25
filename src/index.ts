@@ -12,6 +12,7 @@ import { signJwt, verifyJwt } from './common/jwt.utils';
 import { fastifyHelmet } from '@fastify/helmet';
 import cors from '@fastify/cors';
 import registerJwtPlugin from './plugins/jwt.plugin';
+import swaggerPlugin from './plugins/swagger.plugin';
 import { errorHandler } from './common/app.error';
 import { setupTracing } from './common/tracer.otel';
 
@@ -40,6 +41,7 @@ async function main() {
 
   await server.register(cors, {});
   server.register(fastifyHelmet, { contentSecurityPolicy: false });
+  server.register(swaggerPlugin);
 
   registerJwtPlugin(server, verifyJwt);
 
