@@ -39,12 +39,7 @@ RETURNING id
     return await tracer.startActiveSpan('user.repository.getByEmail', async (span) => {
       const client = await this.pgPool.connect();
       try {
-        const res = await client.query<User>(
-          `
-SELECT * FROM users WHERE email = $1
-`,
-          [email]
-        );
+        const res = await client.query<User>('SELECT * FROM users WHERE email = $1', [email]);
         return res.rows[0] || null;
       } catch (e) {
         throw e;
@@ -59,9 +54,7 @@ SELECT * FROM users WHERE email = $1
     return await tracer.startActiveSpan('user.repository.listAll', async (span) => {
       const client = await this.pgPool.connect();
       try {
-        const res = await client.query(`
-SELECT id, email FROM users
-`);
+        const res = await client.query('SELECT id, email FROM users');
         return res.rows;
       } catch (e) {
         throw e;
