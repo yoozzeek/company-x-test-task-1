@@ -8,12 +8,15 @@ export class AppError extends Error {
   }
 }
 
-export class InvalidCredentialsError extends AppError {}
+export class InternalError extends AppError {}
+export class NotFoundError extends AppError {}
+export class AlreadyExistsError extends AppError {}
+export class UnauthorizedError extends AppError {}
+export class InvalidTokenError extends AppError {}
 export class AccessDeniedError extends AppError {}
-export class UserAlreadyExistsError extends AppError {}
 
 export async function errorHandler(err: FastifyError, req: FastifyRequest, res: FastifyReply) {
-  if (err instanceof InvalidCredentialsError) {
+  if (err instanceof UnauthorizedError) {
     return res.status(401).send({ error: 'Unauthorized' });
   }
 
@@ -21,15 +24,19 @@ export async function errorHandler(err: FastifyError, req: FastifyRequest, res: 
     return res.status(400).send({ error: 'BadRequest', data: err.message });
   }
 
+  if (err instanceof InvalidTokenError) {
+    return res.status(400).send({ error: 'InvalidJWT' });
+  }
+
   if (err instanceof AccessDeniedError) {
     return res.status(403).send({ error: 'AccessDenied' });
   }
 
-  if (err instanceof AppError) {
+  if (err instanceof NotFoundError) {
     return res.status(404).send({ error: 'NotFound' });
   }
 
-  if (err instanceof UserAlreadyExistsError) {
+  if (err instanceof AlreadyExistsError) {
     return res.status(409).send({ error: 'Conflict', message: err.message });
   }
 
