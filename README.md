@@ -20,38 +20,41 @@ cp .env.example .env
 ### Generate jwt keys
 We don't allow simple secret strings for jwt in purpose of security, 
 jwt server secret key should be cryptographically safe and random. 
-Test keys already created and stored in `dev` dir.
+Test keys already created and stored in `/test/keys` dir for your convenience,
+but in the real project even test keys should not be added to source code and git. 
+Sec CI just should reject it.
+
 But in case you need to create new ones follow these instructions.
 
 Generate RSA secret key:
 ```bash
-openssl genpkey -algorithm RSA -out dev/private.key -pkeyopt rsa_keygen_bits:2048
+openssl genpkey -algorithm RSA -out test/private.key -pkeyopt rsa_keygen_bits:2048
 ```
 
 Derive public key:
 ```bash
-openssl rsa -in dev/private.key -pubout -out dev/public.key
+openssl rsa -in test/private.key -pubout -out test/public.key
 ```
 
-
-### Docker
+### Start server (docker)
 Docker compose will start api backend, postgres and all other 
 services. It also runs `migrate:up` command before starting backend.
 ```bash
 docker compose up --build
 ```
 
-### Sources
+### Start server (sources)
 If you have local postgres on your machine or in a cloud, 
-you need to build from the sources and run server without docker.
-```bash
-yarn build && yarn start
-```
+you need to build from the sources and run server without docker. 
 
-#### Up migrations
-Now you need to up apply migrations to database:
+But first, let's up all migrations:
 ```bash
 yarn migrate:up
+```
+
+Then build and start API server:
+```bash
+yarn build && yarn start
 ```
 
 ## Tests
