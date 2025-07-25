@@ -1,0 +1,12 @@
+{
+  "name": "company-x-test-task-1",
+  "version": "0.0.1",
+  "description": "Simple Fastify Rest API with auth guard, JWT middleware and login/register methods. This project is a part of technical interview for a position of Node.js backend developer.",
+  "main": "index.js",
+  "repository": "https://github.com/yoozzeek/company-x-test-task-1.git",
+  "author": "Andrew <zeek@tuta.com>",
+  "license": "GPL-3.0",
+  "private": false,
+  "scripts": {
+  }
+}
