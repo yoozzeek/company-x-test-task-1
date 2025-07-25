@@ -10,6 +10,7 @@ services:
     environment:
       - JWT_PRIVATE_KEY_PATH=/etc/keys/private.key
       - JWT_PUBLIC_KEY_PATH=/etc/keys/public.key
+      - DATABASE_HOST=postgres
       - DATABASE_USER=service
       - DATABASE_PASSWORD=password
       - DATABASE_NAME=service
