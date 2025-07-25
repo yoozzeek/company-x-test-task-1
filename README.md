@@ -6,6 +6,15 @@ I don't use Nest.js here because it's overkill for a task, but still use OpenTel
 because whatever framework or library we use for auth service the observability 
 as well as security is critical.
 
+After installation and start http server will be listening at http://127.0.0.1:3000.
+
+All routes available with `/v1` prefix and follow Rest API spec.
+So final handlers be at these urls:
+* `/v1/auth/login`: Authorizes user and returns JWT token.
+* `/v1/auth/register`: Creates user with email and password.
+* `/v1/users`: Returns list of all users if request has valid jwt token.
+
+
 ## Installation
 The app requires you have `Postgres` database installed and running. 
 Obviously, we'll use docker compose for development and tests for simplicity.
@@ -36,20 +45,22 @@ Derive public key:
 openssl rsa -in test/private.key -pubout -out test/public.key
 ```
 
-### Start server (docker)
+## Start
+
+### Docker compose
 Docker compose will start api backend, postgres and all other 
 services. It also runs `migrate:up` command before starting backend.
 ```bash
 docker compose up --build
 ```
 
-### Start server (sources)
+### Sources
 If you have local postgres on your machine or in a cloud, 
 you need to build from the sources and run server without docker. 
 
 But first, let's up all migrations:
 ```bash
-yarn migrate:up
+DATABASE_URL=postgres://service:password@localhost:5432/service yarn migrate:up
 ```
 
 Then build and start API server:
