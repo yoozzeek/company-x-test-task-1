@@ -19,9 +19,8 @@ import { setupTracing } from './common/tracer.otel';
 
 setupTracing('api_service');
 
-let isShuttingDown = false;
-
 async function main() {
+  let isShuttingDown = false;
   const app: FastifyInstance = Fastify({
     logger: true,
   });
