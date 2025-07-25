@@ -6,6 +6,7 @@
   "repository": "https://github.com/yoozzeek/company-x-test-task-1.git",
   "author": "Andrew <zeek@tuta.com>",
   "license": "GPL-3.0",
+  "type": "module",
   "private": false,
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
@@ -13,7 +14,10 @@
     "start": "node dist/index.js",
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
-    "migrate:create": "node-pg-migrate create"
+    "migrate:create": "node-pg-migrate create",
+    "lint": "eslint 'src/**/*.{ts,js}'",
+    "lint:fix": "eslint 'src/**/*.{ts,js}' --fix",
+    "format": "prettier --write 'src/**/*.{ts,js,json}'"
   },
   "dependencies": {
     "@fastify/swagger": "^9.5.1",
@@ -25,15 +29,27 @@
     "zod": "^4.0.9"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.31.0",
     "@types/bcrypt": "^6.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/pg": "^8.15.4",
     "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "eslint": "^9.31.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.3",
+    "globals": "^16.3.0",
     "jest": "^30.0.5",
     "node-pg-migrate": "^8.0.3",
     "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
     "supertest": "^7.1.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.38.0"
   }
 }
