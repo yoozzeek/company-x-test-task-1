@@ -14,7 +14,6 @@ So final handlers be at these urls:
 * `/v1/auth/register`: Creates user with email and password.
 * `/v1/users`: Returns list of all users if request has valid jwt token.
 
-
 ## Installation
 The app requires you have `Postgres` database installed and running. 
 Obviously, we'll use docker compose for development and tests for simplicity.
@@ -45,6 +44,12 @@ Derive public key:
 openssl rsa -in test/private.key -pubout -out test/public.key
 ```
 
+### Run migrations
+Pass `DATABASE_URL` env and run postgres migrations: 
+```bash
+DATABASE_URL=postgres://service:password@localhost:5432/service yarn migrate:up
+```
+
 ## Start
 
 ### Docker compose
@@ -56,12 +61,7 @@ docker compose up --build
 
 ### Sources
 If you have local postgres on your machine or in a cloud, 
-you need to build from the sources and run server without docker. 
-
-But first, let's up all migrations:
-```bash
-DATABASE_URL=postgres://service:password@localhost:5432/service yarn migrate:up
-```
+you need to build from the sources and run server without docker.
 
 Then build and start API server:
 ```bash
@@ -85,5 +85,4 @@ Every API requests stays observed, errors are tracked. We use Prometheus collect
 Jaeger for traces, and Graphana for metrics visualization.
 
 1. Run `docker compose up --build`.
-2. Open Jaeger dashboard `http://localhost:11111` to see requests and traces.
-3. Open Graphana charts `http://localhost:111111` to see live metrics.
+2. Open Jaeger UI `http://localhost:16686` to see requests and traces.

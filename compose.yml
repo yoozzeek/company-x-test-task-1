@@ -1,5 +1,26 @@
 version: "3.8"
 services:
+  api-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - JWT_PRIVATE_KEY_PATH=/etc/keys/private.key
+      - JWT_PUBLIC_KEY_PATH=/etc/keys/public.key
+      - DATABASE_USER=service
+      - DATABASE_PASSWORD=password
+      - DATABASE_NAME=service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=api-service
+    volumes:
+      - ./test/keys/private.key:/etc/keys/private.key:ro
+      - ./test/keys/public.key:/etc/keys/public.key:ro
+    networks:
+      - local
+
   postgres:
     image: postgres:latest
     volumes:
@@ -13,9 +34,42 @@ services:
     networks:
       - local
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector.yml"]
+    volumes:
+      - ./dev/otel-collector.yml:/etc/otel-collector.yml
+    ports:
+      - "4317:4317"
+    networks:
+      - local
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./dev/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - local
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+    networks:
+      - local
+
 networks:
   local:
     driver: bridge
 
 volumes:
   postgres_data:
+  prometheus_data:
+  grafana_data:
