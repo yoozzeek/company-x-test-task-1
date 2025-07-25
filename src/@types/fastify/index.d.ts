@@ -12,6 +12,6 @@ declare module 'fastify' {
   }
 
   export interface FastifyRequest {
-    authUser?: { id: number; email: string };
+    authPayload?: { id: number; email: string };
   }
 }
