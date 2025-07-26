@@ -1,94 +1,87 @@
 # company-x-test-task-1
-Simple Fastify auth service Rest API with guard, JWT middleware and login/register handlers. 
-This project is a part of technical interview for a position of Node.js backend developer.
+A simple Fastify-based REST API for auth with JWT middleware and login/register handlers.
+This project is part of a Node.js backend developer technical interview.
 
-I don't use Nest.js here because it's overkill for a task, but still use OpenTelemetry 
-because whatever framework or library we use for auth service the observability 
-as well as security is critical.
+Nest.js isn't used here it's too heavy for this task. Funny, but OpenTelemetry is 
+still included, since observability and security are essential no matter what framework we use.
 
-### Urls
+### Endpoints
+After setup, the HTTP server runs at:
+http://127.0.0.1:3000
 
-After installation and start http server will be listening at http://127.0.0.1:3000.
-
-All routes available with `/v1` prefix and follow Rest API spec.
-So final handlers be at these urls:
-* `/v1/auth/login`: Authorizes user and returns JWT token.
-* `/v1/auth/register`: Creates user with email and password.
-* `/v1/users`: Returns list of all users if request has valid jwt token.
+All routes are prefixed with `/v1` and follow REST API conventions:
+* `POST /v1/auth/login` – Authenticate and return a JWT token
+* `POST /v1/auth/register` – Register a new user
+* `GET /v1/users` – Return list of users (JWT required)
 
 ### API Docs
+Swagger UI is available at:
+http://127.0.0.1:3000/docs
 
-Check API docs in Swagger UI that is available at http://127.0.0.1:3000/docs
 
 ## Installation
-The app requires you have `Postgres` database installed and running. 
-Obviously, we'll use docker compose for development and tests for simplicity.
+You need a running Postgres database. We use Docker Compose for development and tests.
 
-### Setup env
-Add and setup `.env` file. You need to pass correct postgres database URL. 
-It's configured for docker compose in the example env.
+### Setup .env
+Copy the example and edit as needed:
 ```base
 cp .env.example .env
 ```
 
+Make sure to set the correct Postgres connection params.
+
 ### Generate jwt keys
-We don't allow simple secret strings for jwt in purpose of security, 
-jwt server secret key should be cryptographically safe and random. 
-Test keys already created and stored in `/test/keys` dir for your convenience,
-but in the real project even test keys should not be added to source code and git. 
-Sec CI just should reject it.
+JWT secrets must be cryptographically secure.
+Test keys are already in `/test/keys`, but in a real project, even test keys shouldn't be committed. 
+Your CI should catch that.
 
-But in case you need to create new ones follow these instructions.
-
-Generate RSA secret key:
+To generate new keys:
 ```bash
+# Private key
 openssl genpkey -algorithm RSA -out test/private.key -pkeyopt rsa_keygen_bits:2048
-```
 
-Derive public key:
-```bash
+# Public key
 openssl rsa -in test/private.key -pubout -out test/public.key
 ```
 
 ### Run migrations
-Pass `DATABASE_URL` env and run postgres migrations: 
+Run Postgres migrations with the correct `DATABASE_URL`:
 ```bash
 DATABASE_URL=postgres://service:password@localhost:5432/service yarn migrate:up
 ```
 
-## Start
+## Start API
 
-### Docker compose
-Docker compose will start api backend, postgres and all other 
-services. It also runs `migrate:up` command before starting backend.
+### With Docker compose
+Runs API backend, Postgres, and other services:
 ```bash
 docker compose up --build
 ```
 
-### Sources
-If you have local postgres on your machine or in a cloud, 
-you need to build from the sources and run server without docker.
+Migrations don't run automatically.
 
-Then build and start API server:
+### From Source
+If you already have Postgres running locally or in the cloud:
 ```bash
 yarn build && yarn start
 ```
 
 ## Tests
-Auth logic unit and E2E tests are critical and simple, 
-so we cannot omit them for even a test task.
-
-One command will just run all unit tests, and programmatically 
-create test postgres container with `testcontainers` package and 
-run E2E tests of API. Ensure you have docker installed.
+This project includes both unit and E2E tests. We'll use Docker and `testcontainers`.
 ```bash
 yarn test
 ```
 
 ## Monitoring
-OpenTelemetry tracer and metric providers integrated and a few simple counters added.
-Every API requests stays observed, errors are tracked. We use Prometheus collector, 
-Jaeger for traces, and Graphana for metrics visualization.
+OpenTelemetry is integrated with simple counters and error tracking. We use:
+* Jaeger for tracing
+* Prometheus for metrics
+* Grafana for visualization
 
-1. Run `docker compose up --build`.
-2. Open Jaeger UI `http://localhost:16686` to see requests and traces.
+To run everything:
+```bash
+docker compose up --build
+```
+
+Then open Jaeger UI:
+http://localhost:16686
