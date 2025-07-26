@@ -46,12 +46,12 @@ async function main() {
   const authService = new AuthService(authRepository, userService, config.jwtPrivateKeyPath);
   const authRoutes = initAuthRoutes(authService);
 
+  await app.register(otelInstrumentation.fastifyPlugin);
+  await app.register(cors, {});
+
   app.register(jwtPlugin, { publicKeyPath: config.jwtPublicKeyPath });
   app.register(fastifyHelmet, { contentSecurityPolicy: false });
   app.register(swaggerPlugin);
-
-  await app.register(otelInstrumentation.fastifyPlugin);
-  await app.register(cors, {});
 
   app.register(authRoutes, { prefix: '/v1/auth' });
   app.register(userRoutes, { prefix: '/v1/users' });

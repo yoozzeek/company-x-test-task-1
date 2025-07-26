@@ -16,10 +16,16 @@ export default fp(
     const verifyJwt = createVerifier({ key: publicKey, algorithms: ['RS256'] });
 
     app.decorate('authenticate', async (request: FastifyRequest<any>, _reply: FastifyReply) => {
+      const { tracer } = request.opentelemetry();
+      const span = tracer.startSpan('jwt.plugin.authenticate');
+
       const authHeader = request.headers['authorization'];
       const parts = (authHeader || '')?.split(' ');
       if (!authHeader?.startsWith('Bearer ') || parts?.length !== 2) {
-        throw new UnauthorizedError('Invalid authorization header');
+        const err = new UnauthorizedError('Invalid authorization header');
+        span.recordException(err);
+        span.end();
+        throw err;
       }
 
       const token = parts[1];
@@ -27,6 +33,8 @@ export default fp(
         request.authPayload = verifyJwt(token);
       } catch (err) {
         throw new BadParamsError('InvalidToken');
+      } finally {
+        span.end();
       }
     });
   }
