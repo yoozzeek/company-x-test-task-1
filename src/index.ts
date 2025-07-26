@@ -11,19 +11,18 @@ import { UserRepository } from './repositories/user.repository';
 import { UserService } from './services/user.service';
 import { fastifyHelmet } from '@fastify/helmet';
 import cors from '@fastify/cors';
-import registerJwtPlugin from './plugins/jwt.plugin';
+import jwtPlugin from './plugins/jwt.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
 import { errorHandler } from './common/app.error';
 import { setupTracing } from './common/tracer.otel';
 import { buildAppCounters, setupMeterProvider } from './common/meter.otel';
 
 async function main() {
+  setupTracing(config.otelServiceName);
+
   const meterProvider = setupMeterProvider(config.otelServiceName);
   const appCounters = buildAppCounters(config.otelServiceName, meterProvider);
-
   appCounters.serverRestarts.add(1);
-
-  setupTracing(config.otelServiceName);
 
   const app: FastifyInstance = Fastify({
     logger: true,
@@ -48,18 +47,18 @@ async function main() {
   const authService = new AuthService(authRepository, userService, config.jwtPrivateKeyPath);
   const authRoutes = initAuthRoutes(authService);
 
-  await app.register(cors, {});
+  app.register(jwtPlugin, { publicKeyPath: config.jwtPublicKeyPath });
   app.register(fastifyHelmet, { contentSecurityPolicy: false });
   app.register(swaggerPlugin);
 
-  registerJwtPlugin(app, config.jwtPublicKeyPath);
+  await app.register(cors, {});
 
   app.register(authRoutes, { prefix: '/v1/auth' });
   app.register(userRoutes, { prefix: '/v1/users' });
 
   app.setErrorHandler(errorHandler);
 
-  app.listen({ host: '0.0.0.0', port: config.port }, function (err, address) {
+  app.listen({ port: config.port }, function (err, address) {
     if (err) {
       app.log.error(err);
       process.exit(1);

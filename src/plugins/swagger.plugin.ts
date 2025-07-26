@@ -2,8 +2,9 @@ import fp from 'fastify-plugin';
 import fastifySwagger from '@fastify/swagger';
 import { fastifySwaggerUi } from '@fastify/swagger-ui';
 import { jsonSchemaTransform, jsonSchemaTransformObject } from 'fastify-type-provider-zod';
+import { FastifyInstance } from 'fastify';
 
-export default fp(async (app) => {
+export default fp(async (app: FastifyInstance) => {
   await app.register(fastifySwagger, {
     swagger: {
       info: {

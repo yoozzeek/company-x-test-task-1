@@ -16,12 +16,12 @@ export class AuthService {
   constructor(
     private repo: AuthRepository,
     private user: UserService,
-    privKeyPath: string
+    privateKeyPath: string
   ) {
-    const jwtPrivKey = fs.readFileSync(path.resolve(privKeyPath));
+    const privKey = fs.readFileSync(path.resolve(privateKeyPath));
     this.jwtSigner = createSigner({
       algorithm: 'RS256',
-      key: jwtPrivKey,
+      key: privKey,
     });
   }
 
