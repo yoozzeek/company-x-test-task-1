@@ -1,10 +1,13 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { InternalError, InvalidTokenError, UnauthorizedError } from '../common/app.error';
+import { BadParamsError, UnauthorizedError } from '../common/app.error';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createVerifier } from 'fast-jwt';
 
-export default function registerJwtPlugin(
-  server: FastifyInstance,
-  verifyJwt: (token: string) => any
-) {
+export default function registerJwtPlugin(server: FastifyInstance, privKeyPath: string) {
+  const publicKey = fs.readFileSync(path.resolve(privKeyPath));
+  const verifyJwt = createVerifier({ key: publicKey, algorithms: ['RS256'] });
+
   server.decorate('authenticate', async (request: FastifyRequest<any>, _reply: FastifyReply) => {
     const authHeader = request.headers['authorization'];
     const parts = (authHeader || '')?.split(' ');
@@ -16,8 +19,7 @@ export default function registerJwtPlugin(
     try {
       request.authPayload = verifyJwt(token);
     } catch (err) {
-      console.error('Unable to verify jwt token', err);
-      throw new InvalidTokenError('Invalid jwt token');
+      throw new BadParamsError('InvalidToken');
     }
   });
 }

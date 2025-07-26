@@ -52,7 +52,7 @@ async function main() {
   app.register(fastifyHelmet, { contentSecurityPolicy: false });
   app.register(swaggerPlugin);
 
-  registerJwtPlugin(app);
+  registerJwtPlugin(app, config.jwtPublicKeyPath);
 
   app.register(authRoutes, { prefix: '/v1/auth' });
   app.register(userRoutes, { prefix: '/v1/users' });

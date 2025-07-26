@@ -3,16 +3,27 @@ import { trace } from '@opentelemetry/api';
 import { LoginDto, RegisterDto } from '../dto/auth.dto';
 import { AuthRepository } from '../repositories/auth.repository';
 import { UserService } from './user.service';
-import { InvalidPasswordError, NotFoundError, UserNotExists } from '../common/app.error';
+import { createSigner } from 'fast-jwt';
+import fs from 'fs';
+import path from 'path';
+import { BadParamsError } from '../common/app.error';
 
 const tracer = trace.getTracer('auth.service');
 
 export class AuthService {
+  private readonly jwtSigner;
+
   constructor(
     private repo: AuthRepository,
     private user: UserService,
-    private signJWT: (payload: object) => string
-  ) {}
+    privKeyPath: string
+  ) {
+    const jwtPrivKey = fs.readFileSync(path.resolve(privKeyPath));
+    this.jwtSigner = createSigner({
+      algorithm: 'RS256',
+      key: jwtPrivKey,
+    });
+  }
 
   public async register(data: RegisterDto) {
     await tracer.startActiveSpan('user.service.register', async (span) => {
@@ -32,15 +43,11 @@ export class AuthService {
     return await tracer.startActiveSpan('auth.service.login', async (span) => {
       try {
         const user = await this.user.getByEmail(data.email);
-        if (!user) throw new UserNotExists('User not found');
-
         const passwordHash = await this.repo.getPasswordHash(user.id);
-        if (!passwordHash) throw new NotFoundError('Password hash not found');
 
-        const isValid = await bcrypt.compare(data.password, passwordHash);
-        if (!isValid) throw new InvalidPasswordError('Invalid password');
+        await comparePasswordHash(data.password, passwordHash);
 
-        return this.signJWT({ id: user.id, email: user.email });
+        return this.jwtSigner({ id: user.id, email: user.email });
       } catch (e) {
         span.recordException(e instanceof Error ? e : String(e));
         throw e;
@@ -49,4 +56,9 @@ export class AuthService {
       }
     });
   }
+}
+
+async function comparePasswordHash(password: string, hash: string) {
+  const ok = await bcrypt.compare(password, hash);
+  if (!ok) throw new BadParamsError('Invalid password');
 }
