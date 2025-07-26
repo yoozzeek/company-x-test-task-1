@@ -3,6 +3,7 @@ dotenv.config();
 
 export const config = {
   port: Number(process.env.PORT) || 3000,
+  otelServiceName: process.env.OTEL_SERVICE_NAME || 'api_service',
   jwtPrivateKeyPath: process.env.JWT_PRIVATE_KEY_PATH || '',
   jwtPublicKeyPath: process.env.JWT_PUBLIC_KEY_PATH || '',
   dbHost: process.env.DATABASE_HOST || '',

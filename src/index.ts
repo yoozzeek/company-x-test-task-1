@@ -9,18 +9,22 @@ import { AuthService } from './services/auth.service';
 import { AuthRepository } from './repositories/auth.repository';
 import { UserRepository } from './repositories/user.repository';
 import { UserService } from './services/user.service';
-import { signJwt, verifyJwt } from './common/jwt.utils';
 import { fastifyHelmet } from '@fastify/helmet';
 import cors from '@fastify/cors';
 import registerJwtPlugin from './plugins/jwt.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
 import { errorHandler } from './common/app.error';
 import { setupTracing } from './common/tracer.otel';
-
-setupTracing('api_service');
+import { buildAppCounters, setupMeterProvider } from './common/meter.otel';
 
 async function main() {
-  let isShuttingDown = false;
+  const meterProvider = setupMeterProvider(config.otelServiceName);
+  const appCounters = buildAppCounters(config.otelServiceName, meterProvider);
+
+  appCounters.serverRestarts.add(1);
+
+  setupTracing(config.otelServiceName);
+
   const app: FastifyInstance = Fastify({
     logger: true,
   });
@@ -41,14 +45,14 @@ async function main() {
   const userRoutes = initUserRoutes(userService);
 
   const authRepository = new AuthRepository(pgPool);
-  const authService = new AuthService(authRepository, userService, signJwt);
+  const authService = new AuthService(authRepository, userService, config.jwtPrivateKeyPath);
   const authRoutes = initAuthRoutes(authService);
 
   await app.register(cors, {});
   app.register(fastifyHelmet, { contentSecurityPolicy: false });
   app.register(swaggerPlugin);
 
-  registerJwtPlugin(app, verifyJwt);
+  registerJwtPlugin(app);
 
   app.register(authRoutes, { prefix: '/v1/auth' });
   app.register(userRoutes, { prefix: '/v1/users' });
@@ -64,6 +68,7 @@ async function main() {
     console.log(`Server is now listening on ${address}`);
   });
 
+  let isShuttingDown = false;
   ['SIGINT', 'SIGTERM'].forEach((signal) => {
     process.on(signal, async () => {
       if (isShuttingDown) return;

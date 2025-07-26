@@ -28,10 +28,12 @@ export function setupTracing(serviceName: string) {
 
   provider.register();
 
-  console.log(`[tracing] OpenTelemetry initialized for: ${serviceName}`);
+  console.log(`[tracing] OpenTelemetry tracer initialized for: ${serviceName}`);
 
-  ['SIGINT', 'SIGTERM'].forEach((_) => async () => {
-    await provider.shutdown();
-    console.log('[tracing] shutdown complete');
+  ['SIGINT', 'SIGTERM'].forEach((signal) => async () => {
+    process.on(signal, async () => {
+      await provider.shutdown();
+      console.log('[tracing] shutdown complete');
+    });
   });
 }
