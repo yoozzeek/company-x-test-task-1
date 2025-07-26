@@ -1,6 +1,6 @@
 import type { Pool, DatabaseError } from 'pg';
 import { User } from '../models/user.model';
-import { AlreadyExistsError } from '../common/app.error';
+import { AlreadyExistsError, NotFoundError } from '../common/app.error';
 import { trace } from '@opentelemetry/api';
 
 const tracer = trace.getTracer('user.repository');
@@ -35,12 +35,20 @@ RETURNING id
     });
   }
 
-  public async getByEmail(email: string): Promise<User | null> {
-    return await tracer.startActiveSpan('user.repository.getByEmail', async (span) => {
+  public async getByEmail(email: string): Promise<User> {
+    let user: User;
+    let caughtError: unknown;
+
+    await tracer.startActiveSpan('user.repository.getByEmail', async (span) => {
       const client = await this.pgPool.connect();
       try {
-        const res = await client.query<User>('SELECT * FROM users WHERE email = $1', [email]);
-        return res.rows[0] || null;
+        const { rows, rowCount } = await client.query<User>(
+          'SELECT id, email, password_hash, created_at FROM users WHERE email = $1',
+          [email]
+        );
+
+        if (!rowCount) caughtError = new NotFoundError('User not found');
+        else user = rows[0];
       } catch (e) {
         throw e;
       } finally {
@@ -48,13 +56,16 @@ RETURNING id
         span.end();
       }
     });
+
+    if (caughtError) throw caughtError;
+    return user!;
   }
 
   public async listAll() {
     return await tracer.startActiveSpan('user.repository.listAll', async (span) => {
       const client = await this.pgPool.connect();
       try {
-        const res = await client.query('SELECT id, email FROM users');
+        const res = await client.query('SELECT id, email, created_at FROM users');
         return res.rows;
       } catch (e) {
         throw e;

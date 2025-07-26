@@ -19,8 +19,6 @@ export class UserService {
     });
   }
 
-  public async getById(id: number) {}
-
   public async getByEmail(email: string) {
     return await tracer.startActiveSpan('user.service.getByEmail', async (span) => {
       try {
