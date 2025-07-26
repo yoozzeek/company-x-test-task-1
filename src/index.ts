@@ -14,15 +14,14 @@ import cors from '@fastify/cors';
 import jwtPlugin from './plugins/jwt.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
 import { errorHandler } from './common/app.error';
-import { setupTracing } from './common/tracer.otel';
-import { buildAppCounters, setupMeterProvider } from './common/meter.otel';
+import setupOtelInstrumentation from './common/otel/setup';
 
 async function main() {
-  setupTracing(config.otelServiceName);
+  const otelInstrumentation = setupOtelInstrumentation(config.appName);
 
-  const meterProvider = setupMeterProvider(config.otelServiceName);
-  const appCounters = buildAppCounters(config.otelServiceName, meterProvider);
-  appCounters.serverRestarts.add(1);
+  const newSpan = otelInstrumentation.tracer.startSpan('foo');
+  newSpan.setAttribute('foo', 'bar');
+  newSpan.end();
 
   const app: FastifyInstance = Fastify({
     logger: true,
@@ -51,6 +50,7 @@ async function main() {
   app.register(fastifyHelmet, { contentSecurityPolicy: false });
   app.register(swaggerPlugin);
 
+  await app.register(otelInstrumentation.fastifyPlugin);
   await app.register(cors, {});
 
   app.register(authRoutes, { prefix: '/v1/auth' });
@@ -58,7 +58,7 @@ async function main() {
 
   app.setErrorHandler(errorHandler);
 
-  app.listen({ port: config.port }, function (err, address) {
+  app.listen({ host: config.appHost, port: config.appPort }, function (err, address) {
     if (err) {
       app.log.error(err);
       process.exit(1);

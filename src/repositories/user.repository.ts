@@ -65,7 +65,7 @@ RETURNING id
     return await tracer.startActiveSpan('user.repository.listAll', async (span) => {
       const client = await this.pgPool.connect();
       try {
-        const res = await client.query('SELECT id, email, created_at FROM users');
+        const res = await client.query<User>('SELECT id, email, created_at FROM users');
         return res.rows;
       } catch (e) {
         throw e;

@@ -35,7 +35,7 @@ export class UserService {
   public async search() {
     return await tracer.startActiveSpan('user.service.search', async (span) => {
       try {
-        return this.repo.listAll();
+        return await this.repo.listAll();
       } catch (e) {
         span.recordException(e as Error);
         throw e;

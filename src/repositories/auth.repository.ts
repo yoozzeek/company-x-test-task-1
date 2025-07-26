@@ -7,7 +7,7 @@ const tracer = trace.getTracer('auth.repository');
 export class AuthRepository {
   constructor(private pgPool: Pool) {}
 
-  public async getPasswordHash(userId: number): Promise<string> {
+  public async getPasswordHash(userId: string): Promise<string> {
     let passwordHash: string;
     let caughtError: unknown;
 

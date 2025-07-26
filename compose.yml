@@ -1,26 +1,29 @@
 version: "3.8"
 services:
-  api-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      - JWT_PRIVATE_KEY_PATH=/etc/keys/private.key
-      - JWT_PUBLIC_KEY_PATH=/etc/keys/public.key
-      - DATABASE_HOST=postgres
-      - DATABASE_USER=service
-      - DATABASE_PASSWORD=password
-      - DATABASE_NAME=service
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=api-service
-    volumes:
-      - ./test/keys/private.key:/etc/keys/private.key:ro
-      - ./test/keys/public.key:/etc/keys/public.key:ro
-    networks:
-      - local
+#  api-service:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    restart: always
+#    ports:
+#      - "3000:3000"
+#    environment:
+#      - APP_PORT=3000
+#      - APP_HOST=0.0.0.0
+#      - JWT_PRIVATE_KEY_PATH=/etc/keys/private.key
+#      - JWT_PUBLIC_KEY_PATH=/etc/keys/public.key
+#      - DATABASE_HOST=postgres
+#      - DATABASE_USER=service
+#      - DATABASE_PASSWORD=password
+#      - DATABASE_NAME=service
+#      - OTEL_COLLECTOR_ENDPOINT=http://otel-collector:4317
+#      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+#      - OTEL_RESOURCE_ATTRIBUTES=service.name=api-service
+#    volumes:
+#      - ./test/keys/private.key:/etc/keys/private.key:ro
+#      - ./test/keys/public.key:/etc/keys/public.key:ro
+#    networks:
+#      - local
 
   postgres:
     image: postgres:latest
@@ -37,18 +40,20 @@ services:
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
-    command: ["--config=/etc/otel-collector.yml"]
+    command: ["--config=/etc/otel-collector.yaml"]
     volumes:
-      - ./dev/otel-collector.yml:/etc/otel-collector.yml
+      - ./dev/otel-collector.yaml:/etc/otel-collector.yaml
     ports:
-      - "4317:4317"
+      - "4317:4317" # OTLP gRPC receiver
+    depends_on:
+      - jaeger
     networks:
       - local
 
   prometheus:
     image: prom/prometheus:latest
     volumes:
-      - ./dev/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./dev/prometheus.yaml:/etc/prometheus/prometheus.yaml
     ports:
       - "9090:9090"
     networks:

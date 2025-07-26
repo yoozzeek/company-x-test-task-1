@@ -5,8 +5,12 @@ receivers:
         endpoint: 0.0.0.0:4317
 
 processors:
+  batch:
+
 extensions:
-  health_check: {}
+  health_check:
+  pprof:
+  zpages:
 
 exporters:
   otlp:
@@ -20,14 +24,14 @@ exporters:
     verbosity: detailed
 
 service:
-  extensions: [health_check]
+  extensions: [health_check, pprof, zpages]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: []
+      processors: [batch]
       exporters: [otlp, debug]
 
     metrics:
       receivers: [otlp]
-      processors: []
+      processors: [batch]
       exporters: [prometheus, debug]
