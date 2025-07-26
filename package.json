@@ -38,6 +38,7 @@
     "fast-jwt": "^6.0.2",
     "fastify": "^5.4.0",
     "fastify-type-provider-zod": "^5.0.2",
+    "node-pg-migrate": "^8.0.3",
     "pg": "^8.16.3",
     "zod": "^4.0.9"
   },
@@ -58,7 +59,6 @@
     "eslint-plugin-prettier": "^5.5.3",
     "globals": "^16.3.0",
     "jest": "^30.0.5",
-    "node-pg-migrate": "^8.0.3",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
     "supertest": "^7.1.4",

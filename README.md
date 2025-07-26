@@ -44,13 +44,8 @@ openssl genpkey -algorithm RSA -out test/private.key -pkeyopt rsa_keygen_bits:20
 openssl rsa -in test/private.key -pubout -out test/public.key
 ```
 
-### Run migrations
-Run Postgres migrations with the correct `DATABASE_URL`:
-```bash
-DATABASE_URL=postgres://service:password@localhost:5432/service yarn migrate:up
-```
-
 ## Start API
+A server will run all migrations automatically on start.
 
 ### With Docker compose
 Runs API backend, Postgres, and other services:

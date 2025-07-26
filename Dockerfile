@@ -33,6 +33,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 fastify
 
 COPY --chown=fastify:nodejs --from=builder /app/dist ./dist
+COPY --chown=fastify:nodejs --from=builder /app/migrations ./migrations
 COPY --chown=fastify:nodejs --from=builder /app/node_modules ./node_modules
 
 # This for testing purposes only

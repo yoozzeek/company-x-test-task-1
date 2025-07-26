@@ -14,19 +14,12 @@ import cors from '@fastify/cors';
 import jwtPlugin from './plugins/jwt.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
 import { errorHandler } from './common/app.error';
+import { runMigrations } from './common/db/migrations';
 import setupOtelInstrumentation from './common/otel/setup';
 
 async function main() {
   const otelInstrumentation = setupOtelInstrumentation(config.appName);
-
-  const newSpan = otelInstrumentation.tracer.startSpan('foo');
-  newSpan.setAttribute('foo', 'bar');
-  newSpan.end();
-
-  const app: FastifyInstance = Fastify({
-    logger: true,
-  });
-
+  const app: FastifyInstance = Fastify({ logger: true });
   const pgPool = new Pool({
     host: config.dbHost,
     user: config.dbUser,
@@ -34,6 +27,15 @@ async function main() {
     database: config.dbName,
     port: 5432,
   });
+
+  const client = await pgPool.connect();
+  try {
+    await runMigrations(client, config.migrationsTable, config.migrationsDir);
+  } catch (e) {
+    console.error('Running db migrations failed', e);
+  } finally {
+    client.release();
+  }
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);

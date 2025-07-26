@@ -12,6 +12,9 @@ services:
       - APP_HOST=0.0.0.0
       - JWT_PRIVATE_KEY_PATH=/etc/keys/private.key
       - JWT_PUBLIC_KEY_PATH=/etc/keys/public.key
+      - AUTO_MIGRATE=true
+      - MIGRATIONS_TABLE=pgmigrations
+      - MIGRATIONS_DIR=/app/migrations
       - DATABASE_HOST=postgres
       - DATABASE_USER=service
       - DATABASE_PASSWORD=password

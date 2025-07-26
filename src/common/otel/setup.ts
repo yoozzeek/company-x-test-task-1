@@ -17,9 +17,6 @@ export default function setupOtelInstrumentation(serviceName: string) {
   const meterProvider = setupMeterProvider(otelResource);
   const meter = meterProvider.getMeter('service_meter');
 
-  const appCounters = buildAppCounters(meter);
-  appCounters.serverRestarts.add(1);
-
   // registerInstrumentations({
   //   tracerProvider: tracerProvider,
   //   meterProvider: meterProvider,
@@ -35,6 +32,9 @@ export default function setupOtelInstrumentation(serviceName: string) {
   });
   fastifyInstrumentation.setTracerProvider(tracerProvider);
   fastifyInstrumentation.setMeterProvider(meterProvider);
+
+  // const appCounters = buildAppCounters(meter);
+  // appCounters.serverRestarts.add(1);
 
   return {
     tracer,
