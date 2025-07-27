@@ -53,8 +53,6 @@ Runs API backend, Postgres, and other services:
 docker compose up --build
 ```
 
-Migrations don't run automatically.
-
 ### From Source
 If you already have Postgres running locally or in the cloud:
 ```bash
