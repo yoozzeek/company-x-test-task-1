@@ -36,10 +36,7 @@ RETURNING id
   }
 
   public async getByEmail(email: string): Promise<User> {
-    let user: User;
-    let caughtError: unknown;
-
-    await tracer.startActiveSpan('user.repository.getByEmail', async (span) => {
+    return await tracer.startActiveSpan('user.repository.getByEmail', async (span) => {
       const client = await this.pgPool.connect();
       try {
         const { rows, rowCount } = await client.query<User>(
@@ -47,8 +44,13 @@ RETURNING id
           [email]
         );
 
-        if (!rowCount) caughtError = new NotFoundError('User not found');
-        else user = rows[0];
+        if (!rowCount) {
+          const err = new NotFoundError('User not found');
+          span.recordException(err);
+          throw err;
+        }
+
+        return rows[0];
       } catch (e) {
         throw e;
       } finally {
@@ -56,9 +58,6 @@ RETURNING id
         span.end();
       }
     });
-
-    if (caughtError) throw caughtError;
-    return user!;
   }
 
   public async listAll() {

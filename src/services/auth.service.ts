@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 import { trace } from '@opentelemetry/api';
 import { LoginDto, RegisterDto } from '../dto/auth.dto';
 import { AuthRepository } from '../repositories/auth.repository';
@@ -10,8 +11,32 @@ import { BadParamsError } from '../common/app.error';
 
 const tracer = trace.getTracer('auth.service');
 
+type AuthJwtClaims = {
+  email: string;
+};
+
+type SignJwtFn = (userId: string, email: string) => string;
+
+function buildSigner(privKey: Buffer): SignJwtFn {
+  return (userId: string, email: string) => {
+    const signer = createSigner<AuthJwtClaims>({
+      key: privKey,
+      algorithm: 'RS256',
+      iss: 'api_service',
+      sub: userId,
+      expiresIn: '1h',
+      notBefore: 60,
+      // should be provided by caller and saved
+      // in db to revoke tokens after.
+      jti: uuidv4(),
+    });
+
+    return signer({ email });
+  };
+}
+
 export class AuthService {
-  private readonly jwtSigner;
+  private readonly signJwt: SignJwtFn;
 
   constructor(
     private repo: AuthRepository,
@@ -19,10 +44,7 @@ export class AuthService {
     privateKeyPath: string
   ) {
     const privKey = fs.readFileSync(path.resolve(privateKeyPath));
-    this.jwtSigner = createSigner({
-      algorithm: 'RS256',
-      key: privKey,
-    });
+    this.signJwt = buildSigner(privKey);
   }
 
   public async register(data: RegisterDto) {
@@ -47,7 +69,7 @@ export class AuthService {
 
         await comparePasswordHash(data.password, passwordHash);
 
-        return this.jwtSigner({ id: user.id, email: user.email });
+        return this.signJwt(user.id, user.email);
       } catch (e) {
         span.recordException(e instanceof Error ? e : String(e));
         throw e;
