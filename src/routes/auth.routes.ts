@@ -51,7 +51,7 @@ export function initAuthRoutes(authService: AuthService): FastifyPluginAsync {
           }),
           400: z.object({
             error: z.string(),
-            data: z.array(z.any()),
+            data: z.array(z.any()).optional(),
           }),
           500: z
             .object({
