@@ -9,9 +9,9 @@ import { AuthService } from './services/auth.service';
 import { AuthRepository } from './repositories/auth.repository';
 import { UserRepository } from './repositories/user.repository';
 import { UserService } from './services/user.service';
-import { fastifyHelmet } from '@fastify/helmet';
+import { fastifyHelmet, FastifyHelmetOptions } from '@fastify/helmet';
 import cors from '@fastify/cors';
-import jwtPlugin from './plugins/jwt.plugin';
+import jwtPlugin, { JwtPluginOptions } from './plugins/jwt.plugin';
 import swaggerPlugin from './plugins/swagger.plugin';
 import { errorHandler } from './common/app.error';
 import { runMigrations } from './common/db/migrations';
@@ -45,14 +45,20 @@ async function main() {
   const userRoutes = initUserRoutes(userService);
 
   const authRepository = new AuthRepository(pgPool);
-  const authService = new AuthService(authRepository, userService, config.jwtPrivateKeyPath);
+  const authService = new AuthService(authRepository, userService, {
+    secretKey: config.jwtSecretKey,
+    privateKeyPath: config.jwtPrivateKeyPath, // has higher priority
+  });
   const authRoutes = initAuthRoutes(authService);
 
   await app.register(otelInstrumentation.fastifyPlugin);
   await app.register(cors, {});
 
-  app.register(jwtPlugin, { publicKeyPath: config.jwtPublicKeyPath });
-  app.register(fastifyHelmet, { contentSecurityPolicy: false });
+  app.register<JwtPluginOptions>(jwtPlugin, {
+    secretKey: config.jwtSecretKey,
+    publicKeyPath: config.jwtPublicKeyPath,
+  });
+  app.register<FastifyHelmetOptions>(fastifyHelmet, { contentSecurityPolicy: false });
   app.register(swaggerPlugin);
 
   app.register(authRoutes, { prefix: '/v1/auth' });

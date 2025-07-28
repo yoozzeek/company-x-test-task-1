@@ -31,11 +31,24 @@ cp .env.example .env
 Make sure to set the correct Postgres connection params.
 
 ### Generate jwt keys
-JWT secrets must be cryptographically secure.
-Test keys are already in `/test/keys`, but in a real project, even test keys shouldn't be committed. 
-Your CI should catch that.
+JWT tokens can be signed using either RSA or HMAC algorithms.
 
-To generate new keys:
+#### HMAC
+HMAC is significantly faster (up to 100x compared to RSA) and is suitable 
+when a single server issues and validates tokens. To use HMAC signing, provide a secret 
+key via the env variable `JWT_HMAC_SECRET_KEY`.
+
+Generate a secure random key:
+```bash
+openssl rand -hex 32
+```
+
+#### RSA
+RSA signing is slower but supports public-key rotation and validation across multiple clients.
+Test keys are included in `/test/keys` for convenience. However, in production and even during 
+tests, never commit RSA keys into the repository. CI pipeline should enforce this rule.
+
+Generate a new RSA key pair:
 ```bash
 # Private key
 openssl genpkey -algorithm RSA -out test/private.key -pkeyopt rsa_keygen_bits:2048
@@ -43,6 +56,10 @@ openssl genpkey -algorithm RSA -out test/private.key -pkeyopt rsa_keygen_bits:20
 # Public key
 openssl rsa -in test/private.key -pubout -out test/public.key
 ```
+
+After generating the keys, specify their paths using these environment variables:
+* `JWT_PRIVATE_KEY_PATH`: Path to your priv key.
+* `JWT_PUBLIC_KEY_PATH`: Path to your pub key.
 
 ## Start API
 A server will run all migrations automatically on start.

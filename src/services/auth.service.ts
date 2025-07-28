@@ -5,9 +5,10 @@ import { LoginDto, RegisterDto } from '../dto/auth.dto';
 import { AuthRepository } from '../repositories/auth.repository';
 import { UserService } from './user.service';
 import { createSigner } from 'fast-jwt';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { BadParamsError } from '../common/app.error';
+import { SupportedJwtAlgorithms, SupportedJwtAlgorithmType } from '../common/jwt.utils';
 
 const tracer = trace.getTracer('auth.service');
 
@@ -15,20 +16,23 @@ type AuthJwtClaims = {
   email: string;
 };
 
-type SignJwtFn = (userId: string, email: string) => string;
+type SignJwtFn = (userId: string, email: string, sessionId: string) => string;
 
-function buildSigner(privKey: Buffer): SignJwtFn {
-  return (userId: string, email: string) => {
+interface JwtSignerOptions {
+  secretKey?: string;
+  privateKeyPath?: string;
+}
+
+function buildSigner(algorithm: SupportedJwtAlgorithmType, key: Buffer | string): SignJwtFn {
+  return (userId: string, email: string, sessionId: string) => {
     const signer = createSigner<AuthJwtClaims>({
-      key: privKey,
-      algorithm: 'RS256',
+      key,
+      algorithm,
       iss: 'api_service',
       sub: userId,
       expiresIn: '1h',
       notBefore: 60,
-      // should be provided by caller and saved
-      // in db to revoke tokens after.
-      jti: uuidv4(),
+      jti: sessionId,
     });
 
     return signer({ email });
@@ -41,10 +45,22 @@ export class AuthService {
   constructor(
     private repo: AuthRepository,
     private user: UserService,
-    privateKeyPath: string
+    jwtOptions: JwtSignerOptions
   ) {
-    const privKey = fs.readFileSync(path.resolve(privateKeyPath));
-    this.signJwt = buildSigner(privKey);
+    let algorithm: SupportedJwtAlgorithmType;
+    let secretKey: string | Buffer;
+
+    if (jwtOptions.privateKeyPath) {
+      algorithm = SupportedJwtAlgorithms.RS256;
+      secretKey = fs.readFileSync(path.resolve(jwtOptions.privateKeyPath));
+    } else if (jwtOptions.secretKey) {
+      algorithm = SupportedJwtAlgorithms.HS256;
+      secretKey = jwtOptions.secretKey;
+    } else {
+      throw new Error('Either JWT secret key or RSA private key should be provided for JWT signer');
+    }
+
+    this.signJwt = buildSigner(algorithm, secretKey);
   }
 
   public async register(data: RegisterDto) {
@@ -69,7 +85,10 @@ export class AuthService {
 
         await comparePasswordHash(data.password, passwordHash);
 
-        return this.signJwt(user.id, user.email);
+        // Should be saved in db (auth_sessions table) to revoke tokens after
+        const sessionId = uuidv4();
+
+        return this.signJwt(user.id, user.email, sessionId);
       } catch (e) {
         span.recordException(e instanceof Error ? e : String(e));
         throw e;

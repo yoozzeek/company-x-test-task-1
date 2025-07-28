@@ -10,8 +10,9 @@ services:
     environment:
       - APP_PORT=3000
       - APP_HOST=0.0.0.0
-      - JWT_PRIVATE_KEY_PATH=/etc/keys/private.key
-      - JWT_PUBLIC_KEY_PATH=/etc/keys/public.key
+      - JWT_SECRET_KEY=1d4cc7f0f76557202ddde48415e737e4508c387b05c5ec40d7df88dae84d730c
+#      - JWT_PRIVATE_KEY_PATH=/etc/keys/private.key
+#      - JWT_PUBLIC_KEY_PATH=/etc/keys/public.key
       - AUTO_MIGRATE=true
       - MIGRATIONS_TABLE=pgmigrations
       - MIGRATIONS_DIR=/app/migrations
