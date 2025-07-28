@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { Server } from 'node:net';
-import type { onRequestHookHandler, preHandlerAsyncHookHandler } from 'fastify';
+import type { onRequestHookHandler } from 'fastify';
 
 declare module 'fastify' {
   export interface FastifyInstance<

@@ -1,8 +1,7 @@
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import { config } from '../../config';
 import { setupTracingProvider } from './tracer';
-import { buildAppCounters, setupMeterProvider } from './meter';
+import { setupMeterProvider } from './meter';
 import { FastifyOtelInstrumentation } from '@fastify/otel';
 
 export default function setupOtelInstrumentation(serviceName: string) {
@@ -24,7 +23,7 @@ export default function setupOtelInstrumentation(serviceName: string) {
   // });
 
   const fastifyInstrumentation = new FastifyOtelInstrumentation({
-    servername: config.appName,
+    servername: serviceName,
     requestHook: (span, request) => {
       span.updateName(`HTTP ${request.method} ${request.url}`);
       span.setAttribute('http.method', request.method);

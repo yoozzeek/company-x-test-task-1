@@ -1,12 +1,20 @@
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
-import { PeriodicExportingMetricReader, MeterProvider } from '@opentelemetry/sdk-metrics';
+import {
+  PeriodicExportingMetricReader,
+  MeterProvider,
+  InMemoryMetricExporter,
+} from '@opentelemetry/sdk-metrics';
 import { Resource } from '@opentelemetry/resources';
 import { Meter } from '@opentelemetry/api';
+import { AggregationTemporality } from '@opentelemetry/sdk-metrics/build/src/export/AggregationTemporality';
 
 export function setupMeterProvider(resource: Resource): MeterProvider {
-  const exporter = new OTLPMetricExporter({
-    url: process.env.OTEL_COLLECTOR_ENDPOINT,
-  });
+  const exporter =
+    process.env.NODE_ENV === 'test'
+      ? new InMemoryMetricExporter(AggregationTemporality.CUMULATIVE)
+      : new OTLPMetricExporter({
+          url: process.env.OTEL_COLLECTOR_ENDPOINT,
+        });
 
   const provider = new MeterProvider({
     resource,

@@ -7,7 +7,7 @@ import { UserService } from './user.service';
 import { createSigner } from 'fast-jwt';
 import fs from 'node:fs';
 import path from 'node:path';
-import { BadParamsError } from '../common/app.error';
+import { BadParamsError, NotFoundError } from '../common/app.error';
 import { SupportedJwtAlgorithms, SupportedJwtAlgorithmType } from '../common/jwt.utils';
 
 const tracer = trace.getTracer('auth.service');
@@ -52,7 +52,7 @@ export class AuthService {
 
     if (jwtOptions.privateKeyPath) {
       algorithm = SupportedJwtAlgorithms.RS256;
-      secretKey = fs.readFileSync(path.resolve(jwtOptions.privateKeyPath));
+      secretKey = fs.readFileSync(path.resolve(__dirname, jwtOptions.privateKeyPath));
     } else if (jwtOptions.secretKey) {
       algorithm = SupportedJwtAlgorithms.HS256;
       secretKey = jwtOptions.secretKey;
@@ -90,6 +90,11 @@ export class AuthService {
 
         return this.signJwt(user.id, user.email, sessionId);
       } catch (e) {
+        // convert not_found errors into bad params
+        if (e instanceof NotFoundError) {
+          throw new BadParamsError('Invalid credentials');
+        }
+
         span.recordException(e instanceof Error ? e : String(e));
         throw e;
       } finally {
@@ -101,5 +106,5 @@ export class AuthService {
 
 async function comparePasswordHash(password: string, hash: string) {
   const ok = await bcrypt.compare(password, hash);
-  if (!ok) throw new BadParamsError('Invalid password');
+  if (!ok) throw new BadParamsError('Invalid credentials');
 }

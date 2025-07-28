@@ -45,16 +45,16 @@ openssl rand -hex 32
 
 #### RSA
 RSA signing is slower but supports public-key rotation and validation across multiple clients.
-Test keys are included in `/test/keys` for convenience. However, in production and even during 
+Test keys are included in `/tests/keys` for convenience. However, in production and even during 
 tests, never commit RSA keys into the repository. CI pipeline should enforce this rule.
 
 Generate a new RSA key pair:
 ```bash
 # Private key
-openssl genpkey -algorithm RSA -out test/private.key -pkeyopt rsa_keygen_bits:2048
+openssl genpkey -algorithm RSA -out private.key -pkeyopt rsa_keygen_bits:2048
 
 # Public key
-openssl rsa -in test/private.key -pubout -out test/public.key
+openssl rsa -in private.key -pubout -out public.key
 ```
 
 After generating the keys, specify their paths using these environment variables:

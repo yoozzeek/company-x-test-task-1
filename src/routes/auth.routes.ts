@@ -3,6 +3,7 @@ import { registerDto, loginDto } from '../dto/auth.dto';
 import { AuthService } from '../services/auth.service';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import { apiErrorZodObject } from '../common/app.error';
 
 export function initAuthRoutes(authService: AuthService): FastifyPluginAsync {
   return async function authRoutes(app: FastifyInstance) {
@@ -20,15 +21,8 @@ export function initAuthRoutes(authService: AuthService): FastifyPluginAsync {
           201: z.object({
             ok: z.boolean(),
           }),
-          400: z.object({
-            error: z.string(),
-            data: z.array(z.any()),
-          }),
-          500: z
-            .object({
-              error: z.string(),
-            })
-            .describe('InternalError'),
+          400: apiErrorZodObject,
+          500: apiErrorZodObject,
         },
       },
       handler: async (req, res) => {
@@ -49,15 +43,8 @@ export function initAuthRoutes(authService: AuthService): FastifyPluginAsync {
           200: z.object({
             token: z.string(),
           }),
-          400: z.object({
-            error: z.string(),
-            data: z.array(z.any()).optional(),
-          }),
-          500: z
-            .object({
-              error: z.string(),
-            })
-            .describe('InternalError'),
+          400: apiErrorZodObject,
+          500: apiErrorZodObject,
         },
       },
       handler: async (req, res) => {

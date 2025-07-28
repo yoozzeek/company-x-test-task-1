@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { UserService } from '../services/user.service';
 import { usersListDto } from '../dto/user.dto';
-import { z } from 'zod';
+import { apiErrorZodObject } from '../common/app.error';
 
 export function initUserRoutes(userService: UserService): FastifyPluginAsync {
   return async function userRoutes(app: FastifyInstance) {
@@ -15,16 +15,8 @@ export function initUserRoutes(userService: UserService): FastifyPluginAsync {
         security: [{ apiKey: [] }],
         response: {
           200: usersListDto,
-          401: z
-            .object({
-              error: z.string(),
-            })
-            .describe('Unauthorized'),
-          500: z
-            .object({
-              error: z.string(),
-            })
-            .describe('InternalError'),
+          401: apiErrorZodObject,
+          500: apiErrorZodObject,
         },
       },
       onRequest: app.authenticate as any,
