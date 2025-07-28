@@ -7,6 +7,7 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     include: ['./tests/e2e/**/*.test.ts'],
-    setupFiles: ['./tests/utils/setup-postgres-with-env.js'],
+    setupFiles: ['./tests/utils/setup-postgres.js'],
+    globalSetup: ['./tests/utils/setup-env.js'],
   },
 });

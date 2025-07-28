@@ -23,7 +23,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await globalVars?.app.close();
-  await globalVars.pgPool.end();
+  await globalVars?.pgPool.end();
 });
 
 describe('Users API E2E', () => {
