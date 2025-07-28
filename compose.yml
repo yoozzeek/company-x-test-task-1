@@ -10,9 +10,9 @@ services:
     environment:
       - APP_PORT=3000
       - APP_HOST=0.0.0.0
-      - JWT_SECRET_KEY=1d4cc7f0f76557202ddde48415e737e4508c387b05c5ec40d7df88dae84d730c
-#      - JWT_PRIVATE_KEY_PATH=/etc/keys/private.key
-#      - JWT_PUBLIC_KEY_PATH=/etc/keys/public.key
+#      - JWT_SECRET_KEY=1d4cc7f0f76557202ddde48415e737e4508c387b05c5ec40d7df88dae84d730c
+      - JWT_PRIVATE_KEY_PATH=/etc/keys/private.key
+      - JWT_PUBLIC_KEY_PATH=/etc/keys/public.key
       - AUTO_MIGRATE=true
       - MIGRATIONS_TABLE=pgmigrations
       - MIGRATIONS_DIR=/app/migrations
@@ -24,8 +24,8 @@ services:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
       - OTEL_RESOURCE_ATTRIBUTES=service.name=api-service
     volumes:
-      - ./test/keys/private.key:/etc/keys/private.key:ro
-      - ./test/keys/public.key:/etc/keys/public.key:ro
+      - ./tests/keys/private.key:/etc/keys/private.key:ro
+      - ./tests/keys/public.key:/etc/keys/public.key:ro
     networks:
       - local
 

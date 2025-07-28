@@ -6,7 +6,6 @@ import { AuthRepository } from '../repositories/auth.repository';
 import { UserService } from './user.service';
 import { createSigner } from 'fast-jwt';
 import fs from 'node:fs';
-import path from 'node:path';
 import { BadParamsError, NotFoundError } from '../common/app.error';
 import { SupportedJwtAlgorithms, SupportedJwtAlgorithmType } from '../common/jwt.utils';
 
@@ -52,7 +51,7 @@ export class AuthService {
 
     if (jwtOptions.privateKeyPath) {
       algorithm = SupportedJwtAlgorithms.RS256;
-      secretKey = fs.readFileSync(path.resolve(__dirname, jwtOptions.privateKeyPath));
+      secretKey = fs.readFileSync(jwtOptions.privateKeyPath);
     } else if (jwtOptions.secretKey) {
       algorithm = SupportedJwtAlgorithms.HS256;
       secretKey = jwtOptions.secretKey;

@@ -1,7 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { BadParamsError, InternalError, UnauthorizedError } from '../common/app.error';
 import fs from 'node:fs';
-import path from 'node:path';
 import { createVerifier, TokenError } from 'fast-jwt';
 import fp from 'fastify-plugin';
 import { SupportedJwtAlgorithms, SupportedJwtAlgorithmType } from '../common/jwt.utils';
@@ -21,7 +20,7 @@ export default fp(async (app: FastifyInstance, opts: JwtPluginOptions) => {
 
   if (opts.publicKeyPath) {
     algorithm = SupportedJwtAlgorithms.RS256;
-    key = fs.readFileSync(path.resolve(opts.publicKeyPath));
+    key = fs.readFileSync(opts.publicKeyPath);
   } else if (opts.secretKey) {
     algorithm = SupportedJwtAlgorithms.HS256;
     key = opts.secretKey!;
