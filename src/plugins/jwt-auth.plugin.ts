@@ -5,12 +5,12 @@ import { createVerifier, TokenError } from 'fast-jwt';
 import fp from 'fastify-plugin';
 import { SupportedJwtAlgorithms, SupportedJwtAlgorithmType } from '../common/jwt.utils';
 
-export interface JwtPluginOptions {
+export interface JwtAuthPluginOptions {
   secretKey?: string;
   publicKeyPath?: string;
 }
 
-export default fp(async (app: FastifyInstance, opts: JwtPluginOptions) => {
+export default fp(async (app: FastifyInstance, opts: JwtAuthPluginOptions) => {
   let algorithm: SupportedJwtAlgorithmType;
   let key: string | Buffer;
 

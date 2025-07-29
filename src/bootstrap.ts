@@ -12,10 +12,12 @@ import { AuthRepository } from './repositories/auth.repository';
 import { AuthService } from './services/auth.service';
 import { initAuthRoutes } from './routes/auth.routes';
 import cors from '@fastify/cors';
-import jwtPlugin, { JwtPluginOptions } from './plugins/jwt.plugin';
-import { fastifyHelmet, FastifyHelmetOptions } from '@fastify/helmet';
+import jwtAuthPlugin from './plugins/jwt-auth.plugin';
+import { fastifyHelmet } from '@fastify/helmet';
 import swaggerPlugin from './plugins/swagger.plugin';
 import { errorHandler } from './common/app.error';
+import type { JwtAuthPluginOptions } from './plugins/jwt-auth.plugin';
+import type { FastifyHelmetOptions } from '@fastify/helmet';
 
 export default async function bootstrapApp(config: ReturnType<typeof getConfig>) {
   const otelInstrumentation = setupOtelInstrumentation(config.appName);
@@ -54,7 +56,7 @@ export default async function bootstrapApp(config: ReturnType<typeof getConfig>)
   await app.register(otelInstrumentation.fastifyPlugin);
   await app.register(cors, {});
 
-  app.register<JwtPluginOptions>(jwtPlugin, {
+  app.register<JwtAuthPluginOptions>(jwtAuthPlugin, {
     secretKey: config.jwtSecretKey,
     publicKeyPath: config.jwtPublicKeyPath,
   });
